@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\LoginController;
+use App\Http\Controllers\LogoutController;
 use App\Http\Controllers\PortfolioController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -16,9 +17,13 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+Route::middleware(['auth:sanctum'])->group(function () {
+    Route::get('/portfolio', [PortfolioController::class, 'index']);
+    Route::post('/portfolio', [PortfolioController::class, 'store']);
+    Route::put('/portfolio/{id}', [PortfolioController::class, 'update']);
+    Route::delete('/portfolio/{id}', [PortfolioController::class, 'destroy']);
+
+    Route::delete('/logout', [LogoutController::class, 'destroy']);
 });
 
 Route::post('/login', [LoginController::class, 'store']);
-Route::get('/portfolio', [PortfolioController::class, 'index']);
