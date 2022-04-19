@@ -1,9 +1,11 @@
 <?php
 
+use App\Http\Controllers\CvController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\LogoutController;
 use App\Http\Controllers\PortfolioController;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -17,13 +19,24 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+
 Route::middleware(['auth:sanctum'])->group(function () {
-    Route::get('/portfolio', [PortfolioController::class, 'index']);
+    Route::get('/user', function () {
+        return Auth::user()->name;
+    });
+
     Route::post('/portfolio', [PortfolioController::class, 'store']);
-    Route::put('/portfolio/{id}', [PortfolioController::class, 'update']);
-    Route::delete('/portfolio/{id}', [PortfolioController::class, 'destroy']);
+    Route::put('/portfolio/update/{id}', [PortfolioController::class, 'update']);
+    Route::delete('/portfolio/delete/{id}', [PortfolioController::class, 'destroy']);
+
+    Route::post('/upload/cv', [CvController::class, 'store']);
 
     Route::delete('/logout', [LogoutController::class, 'destroy']);
 });
+
+Route::get('/portfolio', [PortfolioController::class, 'index']);
+Route::get('/portfolio/{id}', [PortfolioController::class, 'show']);
+
+Route::get('/download/cv', [CvController::class, 'download']);
 
 Route::post('/login', [LoginController::class, 'store']);

@@ -17,7 +17,6 @@ class LoginController extends Controller
             $user = Auth::user();
             $token = $user->createToken('userToken')->plainTextToken;
             $data = [
-                'status' => 200,
                 'token' => $token,
                 'token_type' => 'Bearer'
             ];
