@@ -2,18 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\PortfolioResource;
 use App\Models\Portfolio;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use Symfony\Component\CssSelector\Node\FunctionNode;
 
 class PortfolioController extends Controller
 {
     public function index()
     {
-        $portfolio = Portfolio::all();
-        return response()->json(compact('portfolio'));
+        return PortfolioResource::collection(Portfolio::all());
     }
 
     public function store(Request $request)
@@ -21,12 +20,16 @@ class PortfolioController extends Controller
 
         $request->validate([
             'name' => 'required|min:3|max:20|unique:portfolios',
+            'link' => 'required|min:5',
+            'github' => 'required|min:5',
             'description' => 'required|min:20',
             'image' => 'required|file|image|max:1000'
         ]);
 
         Portfolio::insert([
             'name' => $request->name,
+            'link' => $request->link,
+            'github' => $request->github,
             'description' => $request->description,
             'image' => $request->file('image')->store('image')
         ]);
@@ -36,8 +39,7 @@ class PortfolioController extends Controller
 
     public function show($id)
     {
-        $portfolio = Portfolio::find($id)->first();
-        return response()->json(compact('portfolio'));
+        return new PortfolioResource(Portfolio::find($id)->first());
     }
 
     public function update(Request $request, $id)
@@ -45,17 +47,23 @@ class PortfolioController extends Controller
 
         $request->validate([
             'name' => 'required|min:3|max:20|unique:portfolios,name,' . $id,
+            'link' => 'required|min:5',
+            'github' => 'required|min:5',
             'description' => 'required|min:20',
         ]);
 
+        $portfolio = Portfolio::find($id)->first();
+
         if ($request->image) {
             $request->validate(['image' => 'required|file|image|max:1000']);
-            Storage::delete($request->old_image);
-            Portfolio::find($id)->update(['image' => $request->file('image')->store('image')]);
+            Storage::delete($portfolio->image);
+            $portfolio->update(['image' => $request->file('image')->store('image')]);
         }
 
         Portfolio::find($id)->update([
             'name' => $request->name,
+            'link' => $request->link,
+            'github' => $request->github,
             'description' => $request->description,
         ]);
 
@@ -63,10 +71,11 @@ class PortfolioController extends Controller
         return response()->json(['message' => 'Portfolio update successfully']);
     }
 
-    public function destroy(Request $request, $id)
+    public function destroy($id)
     {
-        Portfolio::where('id', $id)->delete();
-        Storage::delete($request->image);
+        $portfolio =  Portfolio::find($id)->first();
+        $portfolio->delete();
+        Storage::delete($portfolio->image);
 
         return response()->json(['message' => 'Portfolio delete successfully']);
     }
