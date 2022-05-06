@@ -39,7 +39,7 @@ class PortfolioController extends Controller
 
     public function show($id)
     {
-        return new PortfolioResource(Portfolio::find($id)->first());
+        return new PortfolioResource(Portfolio::where('id', $id)->first());
     }
 
     public function update(Request $request, $id)
@@ -52,7 +52,7 @@ class PortfolioController extends Controller
             'description' => 'required|min:20',
         ]);
 
-        $portfolio = Portfolio::find($id)->first();
+        $portfolio = Portfolio::where('id', $id)->first();
 
         if ($request->image) {
             $request->validate(['image' => 'required|file|image|max:1000']);
@@ -60,7 +60,7 @@ class PortfolioController extends Controller
             $portfolio->update(['image' => $request->file('image')->store('image')]);
         }
 
-        Portfolio::find($id)->update([
+        $portfolio->update([
             'name' => $request->name,
             'link' => $request->link,
             'github' => $request->github,
@@ -73,7 +73,7 @@ class PortfolioController extends Controller
 
     public function destroy($id)
     {
-        $portfolio =  Portfolio::find($id)->first();
+        $portfolio =  Portfolio::where('id', $id)->first();
         $portfolio->delete();
         Storage::delete($portfolio->image);
 
